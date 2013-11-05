@@ -2,7 +2,8 @@ import datetime
 
 from django.utils import timezone
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 from account.models import SignupCode
 

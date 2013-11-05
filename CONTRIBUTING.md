@@ -94,7 +94,8 @@ Here is an example of these rules applied:
     from django.utils import timezone
     from django.utils.translation import ugettext_lazy as _
     
-    from django.contrib.auth.models import User
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
     
     # third set of imports are external apps (if applicable)
     from tagging.fields import TagField
@@ -108,7 +109,7 @@ Here is an example of these rules applied:
         A model for storing a task.
         """
         
-        creator = models.ForeignKey(User)
+        creator = models.ForeignKey(settings.AUTH_USER_MODEL)
         created = models.DateTimeField(default=timezone.now)
         modified = models.DateTimeField(default=timezone.now)
         

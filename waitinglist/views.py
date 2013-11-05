@@ -7,7 +7,8 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model
 
 from account.models import SignupCode
 
