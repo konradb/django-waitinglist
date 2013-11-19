@@ -1,10 +1,10 @@
 from django import forms
-
+from 
 from .models import Cohort, SurveyAnswer, SurveyQuestion, WaitingListEntry
 from .signals import answered_survey
+from djangular.forms.angular_model import NgModelFormMixin,NgFormValidationMixin
 
-
-class WaitingListEntryForm(forms.ModelForm):
+class WaitingListEntryForm(NgModelFormMixin,NgFormValidationMixin, forms.ModelForm):
     
     class Meta:
         model = WaitingListEntry
@@ -29,14 +29,14 @@ class WaitingListEntryForm(forms.ModelForm):
         self.fields["email"].label = ""
 
 
-class CohortCreate(forms.ModelForm):
+class CohortCreate(NgModelFormMixin,NgFormValidationMixin,forms.ModelForm):
     
     class Meta:
         model = Cohort
         exclude = ["created"]
 
 
-class SurveyForm(forms.Form):
+class SurveyForm(NgModelFormMixin,NgFormValidationMixin,forms.Form):
     
     def __init__(self, *args, **kwargs):
         self.survey = kwargs.pop("survey")

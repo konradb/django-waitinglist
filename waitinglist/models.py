@@ -31,17 +31,17 @@ class WaitingListEntry(models.Model):
         verbose_name_plural = _("waiting list entries")
 
 
-@receiver(post_save, sender=WaitingListEntry)
-def handle_waitinglistentry_save(sender, **kwargs):
-    if kwargs.get("created"):
-        try:
-            survey = Survey.objects.get(active=True)
-            SurveyInstance.objects.create(
-                survey=survey,
-                entry=kwargs.get("instance")
-            )
-        except Survey.DoesNotExist:
-            pass
+#@receiver(post_save, sender=WaitingListEntry)
+#def handle_waitinglistentry_save(sender, **kwargs):
+#    if kwargs.get("created"):
+#        try:
+#            survey = Survey.objects.get(active=True)
+#            SurveyInstance.objects.create(
+#                survey=survey,
+#                entry=kwargs.get("instance")
+#            )
+#        except Survey.DoesNotExist:
+#            pass
 
 
 class Survey(models.Model):
@@ -61,7 +61,8 @@ class Survey(models.Model):
 class SurveyInstance(models.Model):
     
     survey = models.ForeignKey(Survey, related_name="instances")
-    entry = models.OneToOneField(WaitingListEntry)
+    entry = models.OneToOneField(WaitingListEntry, null = True)
+    user = models.OneToOneField(null= True)
     code = models.CharField(max_length=200, unique=True)
     
     def generate_hash(self):

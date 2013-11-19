@@ -13,7 +13,7 @@ setup(
     packages = find_packages(),
     package_data = {"waitinglist": ["templates/*/*"]},
     install_requires = [
-        "django-appconf==0.5",
+        "django-appconf==0.5","django-angular"
     ],
     classifiers = [
         "Development Status :: 4 - Beta",
