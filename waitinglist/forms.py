@@ -1,7 +1,8 @@
 from django import forms
 from .models import Cohort, SurveyAnswer, SurveyQuestion, WaitingListEntry
 from .signals import answered_survey
-from djangular.forms.angular_model import NgModelFormMixin,NgFormValidationMixin
+from djangular.forms.angular_model import NgModelFormMixin
+from djangular.forms import NgFormValidationMixin
 
 class WaitingListEntryForm(NgModelFormMixin,NgFormValidationMixin, forms.ModelForm):
     
