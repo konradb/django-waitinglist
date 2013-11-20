@@ -61,8 +61,8 @@ class Survey(models.Model):
 class SurveyInstance(models.Model):
     
     survey = models.ForeignKey(Survey, related_name="instances")
-    entry = models.OneToOneField(WaitingListEntry, null = True)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, null= True)
+    entry = models.OneToOneField(WaitingListEntry, null = True, blank= True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, null= True, blank = True)
     code = models.CharField(max_length=200, unique=True)
     
     def generate_hash(self):
