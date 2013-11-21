@@ -123,6 +123,8 @@ def cohort_detail(request, pk):
     
     ctx = {
         "cohort": cohort,
+        "cohort_members" : cohort.members(),
+        "cohort_members_count" : cohort.member_count(),
         "waiting_list": waiting_list,
     }
     return render(request, "cohorts/cohort_detail.html", ctx)
