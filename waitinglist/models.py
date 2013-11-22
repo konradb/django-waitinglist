@@ -66,7 +66,10 @@ class SurveyInstance(models.Model):
     code = models.CharField(max_length=200, unique=True)
     
     def generate_hash(self):
-        return hashlib.md5(self.entry.email + SURVEY_SECRET).hexdigest()
+        if (not self.entry):
+            return hashlib.md5(self.user.username + SURVEY_SECRET).hexdigest()
+        else:    
+            return hashlib.md5(self.entry.email + SURVEY_SECRET).hexdigest()
     
     def save(self, *args, **kwargs):
         self.code = self.generate_hash()
@@ -218,9 +221,19 @@ class UserCohort(models.Model):
 
 @receiver(user_signed_up)
 def handle_user_signup(sender, **kwargs):
+    try:
+        survey = Survey.objects.get(active=True)
+        SurveyInstance.objects.create(
+            survey=survey,
+            user=kwargs["user"]
+        )
+    except Survey.DoesNotExist:
+        pass
     signup_code = kwargs["form"].cleaned_data["code"]
     # fetch the cohort for the signup code
     qs = SignupCodeCohort.objects.select_related("cohort")
+    try:
+        user=kwargs["user"]
     try:
         cohort = qs.get(signup_code__code=signup_code).cohort
         # create a UserCohort for user association to a cohort
