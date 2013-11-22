@@ -31,7 +31,7 @@ class WaitingListEntry(models.Model):
         verbose_name_plural = _("waiting list entries")
 
 
-#@receiver(post_save, sender=WaitingListEntry)
+#@receiver(post_save, sender=MenthalUser)
 #def handle_waitinglistentry_save(sender, **kwargs):
 #    if kwargs.get("created"):
 #        try:
@@ -232,8 +232,6 @@ def handle_user_signup(sender, **kwargs):
     signup_code = kwargs["form"].cleaned_data["code"]
     # fetch the cohort for the signup code
     qs = SignupCodeCohort.objects.select_related("cohort")
-    try:
-        user=kwargs["user"]
     try:
         cohort = qs.get(signup_code__code=signup_code).cohort
         # create a UserCohort for user association to a cohort

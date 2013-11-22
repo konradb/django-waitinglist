@@ -15,7 +15,7 @@ from account.models import SignupCode
 from .forms import WaitingListEntryForm, CohortCreate, SurveyForm
 from .models import WaitingListEntry, Cohort, SignupCodeCohort, SurveyInstance
 from .signals import signed_up
-
+import account.views
 
 @require_POST
 def ajax_list_signup(request):
@@ -62,6 +62,7 @@ def list_signup(request, post_save_redirect=None):
         "form": form,
     }
     return render(request, "waitinglist/list_signup.html", ctx)
+
 
 
 def survey(request, code):
@@ -174,3 +175,4 @@ def cohort_send_invitations(request, pk):
     cohort.send_invitations()
     
     return redirect("waitinglist_cohort_detail", cohort.id)
+
