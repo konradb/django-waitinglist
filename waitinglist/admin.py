@@ -38,7 +38,10 @@ class SurveyInstanceAdmin(admin.ModelAdmin):
         return obj.survey.label
     
     def email(self, obj):
-        return obj.entry.email
+        if (not obj.user): 
+            return obj.entry.email
+        else:
+            return obj.user.email
     
     def created(self, obj):
         return obj.entry.created
