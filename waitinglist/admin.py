@@ -47,7 +47,7 @@ class SurveyInstanceAdmin(admin.ModelAdmin):
         if (not obj.user): 
             return obj.entry.created
         else:
-            return obj.user.created
+            return obj.user.date_joined
 
 
 class SurveyAnswerAdmin(admin.ModelAdmin):
