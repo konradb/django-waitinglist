@@ -239,7 +239,7 @@ def handle_user_signup(sender, **kwargs):
     except SignupCodeCohort.DoesNotExist:
         pass
 
-@receiver(user_signed_up, user_registered)
+@receiver([user_signed_up, user_registered])
 def handle_user_signup(sender, **kwargs):
     try:
         survey = Survey.objects.get(active=True)
