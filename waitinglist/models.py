@@ -16,7 +16,7 @@ User = get_user_model()
 
 from account.models import SignupCode, SignupCodeResult
 from account.signals import user_signed_up
-
+from registration.signals import user_registered
 
 SURVEY_SECRET = getattr(settings, "WAITINGLIST_SURVEY_SECRET", settings.SECRET_KEY)
 
@@ -121,10 +121,10 @@ class SurveyQuestion(models.Model):
             kwargs.update({"widget": forms.Textarea()})
         elif self.kind == SurveyQuestion.RADIO_CHOICES:
             field_class = forms.ModelChoiceField
-            kwargs.update({"widget": forms.RadioSelect(), "queryset": self.choices.all()})
+            kwargs.update({"widget": forms.RadioSelect(), "queryset": self.choices.all(), empty_label=None})
         elif self.kind == SurveyQuestion.CHECKBOX_FIELD:
             field_class = forms.ModelMultipleChoiceField
-            kwargs.update({"widget": forms.CheckboxSelectMultiple(), "queryset": self.choices.all()})
+            kwargs.update({"widget": forms.CheckboxSelectMultiple(), "queryset": self.choices.all(), empty_label=None})
         elif self.kind == SurveyQuestion.BOOLEAN_FIELD:
             field_class = forms.BooleanField
         
@@ -229,6 +229,29 @@ def handle_user_signup(sender, **kwargs):
         )
     except Survey.DoesNotExist:
         pass
+    signup_code = kwargs["form"].cleaned_data["code"]
+    # fetch the cohort for the signup code
+    qs = SignupCodeCohort.objects.select_related("cohort")
+    try:
+        cohort = qs.get(signup_code__code=signup_code).cohort
+        # create a UserCohort for user association to a cohort
+        UserCohort.objects.create(user=kwargs["user"], cohort=cohort)
+    except SignupCodeCohort.DoesNotExist:
+        pass
+
+@receiver(user_signed_up, user_registered)
+def handle_user_signup(sender, **kwargs):
+    try:
+        survey = Survey.objects.get(active=True)
+        SurveyInstance.objects.create(
+            survey=survey,
+            user=kwargs["user"]
+        )
+    except Survey.DoesNotExist:
+        pass
+
+@receiver(user_signed_up)
+def handle_user_signup(sender, **kwargs):
     signup_code = kwargs["form"].cleaned_data["code"]
     # fetch the cohort for the signup code
     qs = SignupCodeCohort.objects.select_related("cohort")
