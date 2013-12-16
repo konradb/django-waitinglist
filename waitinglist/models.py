@@ -121,10 +121,10 @@ class SurveyQuestion(models.Model):
             kwargs.update({"widget": forms.Textarea()})
         elif self.kind == SurveyQuestion.RADIO_CHOICES:
             field_class = forms.ModelChoiceField
-            kwargs.update({"widget": forms.RadioSelect(), "queryset": self.choices.all(), empty_label=None})
+            kwargs.update({"widget": forms.RadioSelect(), "queryset": self.choices.all(), "empty_label": None})
         elif self.kind == SurveyQuestion.CHECKBOX_FIELD:
             field_class = forms.ModelMultipleChoiceField
-            kwargs.update({"widget": forms.CheckboxSelectMultiple(), "queryset": self.choices.all(), empty_label=None})
+            kwargs.update({"widget": forms.CheckboxSelectMultiple(), "queryset": self.choices.all(), "empty_label" : None})
         elif self.kind == SurveyQuestion.BOOLEAN_FIELD:
             field_class = forms.BooleanField
         
