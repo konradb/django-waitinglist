@@ -17,6 +17,7 @@ User = get_user_model()
 from account.models import SignupCode, SignupCodeResult
 from account.signals import user_signed_up
 from registration.signals import user_registered
+from .signal import survey_answered
 
 SURVEY_SECRET = getattr(settings, "WAITINGLIST_SURVEY_SECRET", settings.SECRET_KEY)
 
@@ -242,3 +243,5 @@ def handle_user_signup(sender, **kwargs):
         UserCohort.objects.create(user=kwargs["user"], cohort=cohort)
     except SignupCodeCohort.DoesNotExist:
         pass
+
+
