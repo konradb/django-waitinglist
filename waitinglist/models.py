@@ -17,7 +17,7 @@ User = get_user_model()
 from account.models import SignupCode, SignupCodeResult
 from account.signals import user_signed_up
 from registration.signals import user_registered
-from .signal import answered_survey
+from waitinglist.signal import answered_survey
 
 SURVEY_SECRET = getattr(settings, "WAITINGLIST_SURVEY_SECRET", settings.SECRET_KEY)
 
