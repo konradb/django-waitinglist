@@ -12,6 +12,7 @@ User = get_user_model()
 
 from account.models import SignupCode
 
+from django.views.decorators.csrf import csrf_exempt
 from .forms import WaitingListEntryForm, CohortCreate, SurveyForm
 from .models import WaitingListEntry, Cohort, SignupCodeCohort, SurveyInstance
 from .signals import signed_up
@@ -40,7 +41,7 @@ def ajax_list_signup(request):
         }
     return HttpResponse(json.dumps(data), mimetype="application/json")
 
-
+@csrf_exempt
 def list_signup(request, post_save_redirect=None):
     if request.method == "POST":
         form = WaitingListEntryForm(request.POST)
