@@ -12,9 +12,9 @@ User = get_user_model()
 
 from account.models import SignupCode
 
-from .forms import WaitingListEntryForm, CohortCreate, SurveyForm
-from .models import WaitingListEntry, Cohort, SignupCodeCohort, SurveyInstance
-from .signals import signed_up
+from waitinglist.forms import WaitingListEntryForm, CohortCreate, SurveyForm
+from waitinglist.models import WaitingListEntry, Cohort, SignupCodeCohort, SurveyInstance
+from waitinglist.signals import signed_up
 import account.views
 
 @require_POST
