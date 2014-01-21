@@ -17,6 +17,7 @@ User = get_user_model()
 from account.models import SignupCode, SignupCodeResult
 from account.signals import user_signed_up
 from registration.signals import user_registered
+from .signal import answered_survey
 
 SURVEY_SECRET = getattr(settings, "WAITINGLIST_SURVEY_SECRET", settings.SECRET_KEY)
 
@@ -219,28 +220,9 @@ class UserCohort(models.Model):
     cohort = models.ForeignKey(Cohort)
 
 
-@receiver(user_signed_up)
-def handle_user_signup(sender, **kwargs):
-    try:
-        survey = Survey.objects.get(active=True)
-        SurveyInstance.objects.create(
-            survey=survey,
-            user=kwargs["user"]
-        )
-    except Survey.DoesNotExist:
-        pass
-    signup_code = kwargs["form"].cleaned_data["code"]
-    # fetch the cohort for the signup code
-    qs = SignupCodeCohort.objects.select_related("cohort")
-    try:
-        cohort = qs.get(signup_code__code=signup_code).cohort
-        # create a UserCohort for user association to a cohort
-        UserCohort.objects.create(user=kwargs["user"], cohort=cohort)
-    except SignupCodeCohort.DoesNotExist:
-        pass
 
 @receiver([user_signed_up, user_registered])
-def handle_user_signup(sender, **kwargs):
+def handle_user_registration(sender, **kwargs):
     try:
         survey = Survey.objects.get(active=True)
         SurveyInstance.objects.create(
@@ -261,3 +243,5 @@ def handle_user_signup(sender, **kwargs):
         UserCohort.objects.create(user=kwargs["user"], cohort=cohort)
     except SignupCodeCohort.DoesNotExist:
         pass
+
+

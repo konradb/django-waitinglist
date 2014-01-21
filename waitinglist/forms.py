@@ -4,7 +4,7 @@ from waitinglist.signals import answered_survey
 from djangular.forms.angular_model import NgModelFormMixin
 from djangular.forms import NgFormValidationMixin
 
-class WaitingListEntryForm(NgModelFormMixin,NgFormValidationMixin, forms.ModelForm):
+class WaitingListEntryForm(forms.ModelForm):
     
     class Meta:
         model = WaitingListEntry
@@ -29,14 +29,14 @@ class WaitingListEntryForm(NgModelFormMixin,NgFormValidationMixin, forms.ModelFo
         self.fields["email"].label = ""
 
 
-class CohortCreate(NgModelFormMixin,NgFormValidationMixin,forms.ModelForm):
+class CohortCreate(forms.ModelForm):
     
     class Meta:
         model = Cohort
         exclude = ["created"]
 
 
-class SurveyForm(NgModelFormMixin,NgFormValidationMixin,forms.Form):
+class SurveyForm(forms.Form):
     
     def __init__(self, *args, **kwargs):
         self.survey = kwargs.pop("survey")
