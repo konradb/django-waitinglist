@@ -9,13 +9,15 @@ from django.views.decorators.http import require_POST
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
+from django.contrib.auth.decorators import permission_required
 
 from account.models import SignupCode
+from account.decorators import login_required
 
 from django.views.decorators.csrf import csrf_exempt
-from .forms import WaitingListEntryForm, CohortCreate, SurveyForm
-from .models import WaitingListEntry, Cohort, SignupCodeCohort, SurveyInstance
-from .signals import signed_up
+from waitinglist.forms import WaitingListEntryForm, CohortCreate, SurveyForm
+from waitinglist.models import WaitingListEntry, Cohort, SignupCodeCohort, SurveyInstance
+from waitinglist.signals import signed_up
 import account.views
 
 @require_POST
@@ -78,51 +80,48 @@ def survey(request, code):
     return render(request, "waitinglist/survey.html", {"form": form})
 
 
+@login_required
+@permission_required("waitinglist.manage_cohorts")
 def cohort_list(request):
-    
-    if not request.user.is_staff:
-        raise Http404()
-    
+
     ctx = {
         "cohorts": Cohort.objects.order_by("-created")
     }
     return render(request, "cohorts/cohort_list.html", ctx)
 
 
+@login_required
+@permission_required("waitinglist.manage_cohorts")
 def cohort_create(request):
-    
-    if not request.user.is_staff:
-        raise Http404()
-    
+
     if request.method == "POST":
         form = CohortCreate(request.POST)
-        
+
         if form.is_valid():
             cohort = form.save()
             return redirect("waitinglist_cohort_detail", cohort.id)
     else:
         form = CohortCreate()
-    
+
     ctx = {
         "form": form,
     }
     return render(request, "cohorts/cohort_create.html", ctx)
 
 
+@login_required
+@permission_required("waitinglist.manage_cohorts")
 def cohort_detail(request, pk):
-    
-    if not request.user.is_staff:
-        raise Http404()
-    
+
     cohort = get_object_or_404(Cohort, pk=pk)
-    
+
     # people who are NOT invited or on the site already
     waiting_list = WaitingListEntry.objects.exclude(
         email__in=SignupCode.objects.values("email")
     ).exclude(
         email__in=User.objects.values("email")
     )
-    
+
     ctx = {
         "cohort": cohort,
         "cohort_members" : cohort.members(),
@@ -132,13 +131,12 @@ def cohort_detail(request, pk):
     return render(request, "cohorts/cohort_detail.html", ctx)
 
 
+@login_required
+@permission_required("waitinglist.manage_cohorts")
 def cohort_member_add(request, pk):
-    
-    if not request.user.is_staff:
-        raise Http404()
-    
+
     cohort = Cohort.objects.get(pk=pk)
-    
+
     if "invite_next" in request.POST:
         try:
             N = int(request.POST["invite_next"])
@@ -157,23 +155,22 @@ def cohort_member_add(request, pk):
             emails = [email]
         else:
             emails = []
-    
+
     for email in emails:
         if not SignupCode.objects.filter(email=email).exists():
             signup_code = SignupCode.create(email=email, max_uses=1, expiry=730)
             signup_code.save()
             SignupCodeCohort.objects.create(signup_code=signup_code, cohort=cohort)
-    
+
     return redirect("waitinglist_cohort_detail", cohort.id)
 
 
+@login_required
+@permission_required("waitinglist.manage_cohorts")
 def cohort_send_invitations(request, pk):
-    
-    if not request.user.is_staff:
-        raise Http404()
-    
+
     cohort = Cohort.objects.get(pk=pk)
     cohort.send_invitations()
-    
+
     return redirect("waitinglist_cohort_detail", cohort.id)
 
