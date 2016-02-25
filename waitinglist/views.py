@@ -1,14 +1,13 @@
 import json
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from django.contrib.auth import get_user_model
-User = get_user_model()
 from django.contrib.auth.decorators import permission_required
 
 from account.models import SignupCode
@@ -23,6 +22,9 @@ from waitinglist.forms import WaitingListEntryForm, CohortCreate, SurveyForm
 from waitinglist.models import WaitingListEntry, Cohort, SignupCodeCohort, SurveyInstance
 from waitinglist.signals import signed_up
 import account.views
+
+User = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
 
 @require_POST
 def ajax_list_signup(request):
@@ -45,7 +47,7 @@ def ajax_list_signup(request):
                 "form": form,
             },  context_instance=RequestContext(request))
         }
-    return HttpResponse(json.dumps(data), mimetype="application/json")
+    return HttpResponse(json.dumps(data), content_type="application/json")
 
 @csrf_exempt
 def list_signup(request, post_save_redirect=None):

@@ -11,13 +11,13 @@ from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from django.contrib.auth import get_user_model
-User = get_user_model()
-
 from account.models import SignupCode, SignupCodeResult
 from account.signals import user_signed_up
-from registration.signals import user_registered
-from waitinglist.signals import answered_survey
+
+from . import trello
+
+
+User = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 SURVEY_SECRET = getattr(settings, "WAITINGLIST_SURVEY_SECRET", settings.SECRET_KEY)
 
@@ -26,11 +26,20 @@ class WaitingListEntry(models.Model):
 
     email = models.EmailField(_("email address"), unique=True)
     created = models.DateTimeField(_("created"), default=timezone.now, editable=False)
+    trello_card_id = models.CharField(max_length=100, blank=True)
+    initial_contact_sent = models.BooleanField(default=False)
+
+    def reset_trello_link(self):
+        if self.trello_card_id:
+            api = trello.Api()
+            api.delete_card(self.trello_card_id)
+            self.trello_card_id = ""
+            self.save()
 
     class Meta:
         verbose_name = _("waiting list entry")
         verbose_name_plural = _("waiting list entries")
-    
+
     def __unicode__(self):
         return self.email
 
@@ -101,7 +110,8 @@ class SurveyQuestion(models.Model):
     kind = models.IntegerField(choices=FIELD_TYPE_CHOICES)
     help_text = models.TextField(blank=True)
     ordinal = models.IntegerField(blank=True)
-    required = models.BooleanField()
+    required = models.BooleanField(default=False)
+    trello_list_id = models.CharField(max_length=100, blank=True)
 
     class Meta:
         unique_together = [
@@ -128,7 +138,8 @@ class SurveyQuestion(models.Model):
             kwargs.update({"widget": forms.RadioSelect(), "queryset": self.choices.all(), "empty_label": None})
         elif self.kind == SurveyQuestion.CHECKBOX_FIELD:
             field_class = forms.ModelMultipleChoiceField
-            kwargs.update({"widget": forms.CheckboxSelectMultiple(), "queryset": self.choices.all(), "empty_label" : None})
+            kwargs.update({"widget": forms.CheckboxSelectMultiple(),
+                           "queryset": self.choices.all()})
         elif self.kind == SurveyQuestion.BOOLEAN_FIELD:
             field_class = forms.BooleanField
 
@@ -158,6 +169,7 @@ class SurveyAnswer(models.Model):
     value = models.TextField(blank=True)
     value_boolean = models.NullBooleanField(blank=True)
     created = models.DateTimeField(_("created"), default=timezone.now, editable=False)
+    trello_card_id = models.CharField(max_length=100, blank=True)
 
 
 Member = collections.namedtuple("Member", ["email", "signup_code", "user", "invited"])
